@@ -56,4 +56,4 @@ Ability to use Record class as analog to browse_record:
     ... 'assigned'
 """
 
-from odoo_rpc_client.client import Client
+from odoo_rpc_client.client import Client  # noqa

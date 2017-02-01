@@ -19,7 +19,7 @@ which could be directly written to file (or
 just use *report.save(path)* method)
 """
 
-from odoo_rpc_client.service.report import (ReportError,
-                                            ReportResult,
-                                            Report,
-                                            ReportService)
+from odoo_rpc_client.service.report import (ReportError,    # noqa
+                                            ReportResult,   # noqa
+                                            Report,         # noqa
+                                            ReportService)  # noqa

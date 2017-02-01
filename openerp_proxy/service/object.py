@@ -1,1 +1,1 @@
-from odoo_rpc_client.service.object import ObjectService
+from odoo_rpc_client.service.object import ObjectService  # noqa

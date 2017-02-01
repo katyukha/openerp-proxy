@@ -1,1 +1,1 @@
-from odoo_rpc_client.orm.service import Service
+from odoo_rpc_client.orm.service import Service  # noqa

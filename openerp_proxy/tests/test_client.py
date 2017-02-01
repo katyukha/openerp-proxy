@@ -113,18 +113,18 @@ class Test_10_Client(BaseTestCase):
         # Check plugin representation
         self.assertEqual(
             str(self.client.plugins),
-            "openerp_proxy.plugin.PluginManager [%d]" % len(
+            "odoo_rpc_client.plugin.PluginManager [%d]" % len(
                 self.client.plugins))
         self.assertEqual(
             repr(self.client.plugins),
-            "<openerp_proxy.plugin.PluginManager [%d]>" % len(
+            "<odoo_rpc_client.plugin.PluginManager [%d]>" % len(
                 self.client.plugins))
         self.assertEqual(
             str(self.client.plugins.Test),
-            "openerp_proxy.plugin.Plugin:Test")
+            "odoo_rpc_client.plugin.Plugin:Test")
         self.assertEqual(
             repr(self.client.plugins.Test),
-            "<openerp_proxy.plugin.Plugin:Test>")
+            "<odoo_rpc_client.plugin.Plugin:Test>")
 
     def test_162_plugins_wrong_name(self):
         self.assertNotIn(

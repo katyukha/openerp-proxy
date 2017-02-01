@@ -1,17 +1,15 @@
 # -*- encoding: utf-8 -*-
 import os
-import six
 import json
-import functools
 
-from odoo_rpc_client.utils import (normalizeSField,
-                                   wpartial,
-                                   preprocess_args,
-                                   stdcall,
-                                   UConverter,
-                                   ustr,
-                                   DirMixIn,
-                                   AttrDict)
+from odoo_rpc_client.utils import (normalizeSField,  # noqa
+                                   wpartial,         # noqa
+                                   preprocess_args,  # noqa
+                                   stdcall,          # noqa
+                                   UConverter,       # noqa
+                                   ustr,             # noqa
+                                   DirMixIn,         # noqa
+                                   AttrDict)         # noqa
 
 __all__ = ('ustr',
            'AttrDict',

@@ -1,2 +1,2 @@
-from odoo_rpc_client.plugin import (Plugin,
-                                    PluginManager)
+from odoo_rpc_client.plugin import (Plugin,           # noqa
+                                    PluginManager)    # noqa
