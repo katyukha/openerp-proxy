@@ -67,6 +67,7 @@ setup(name='openerp_proxy',
           'requests>=2.7',
           'ipython>=4',       # repr extension
           'Jinja2',
+          'odoo-rpc-client',
       ],
       tests_require=[
           'mock',
