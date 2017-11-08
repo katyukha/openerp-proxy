@@ -103,9 +103,11 @@ Quick example
 Supported Odoo server versions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Tested with Odoo *7.0*, *8.0*, *9.0*, *10.0rc1c*
+Tested with Odoo *10.0*, *11.0*
 
-Also shoud work with Odoo 6.1
+But should support all odoo versions that
+`odoo_rpc_client <https://pypi.python.org/pypi/odoo_rpc_client>`__
+supports
 
 
 Examples

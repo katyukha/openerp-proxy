@@ -54,6 +54,12 @@ class Test_31_ExtSugar(BaseTestCase):
         bank_ids = [i for i, _ in self.object.name_search('Bank')]
         self.assertItemsEqual(res.ids, bank_ids)
 
+    def test_obj_iter(self):
+        for index, rec in enumerate(self.object):
+            self.assertLessEqual(index, len(self.object))
+            self.assertIsInstance(rec, Record)
+            self.assertEqual(rec._object.name, 'res.partner')
+
     def test_obj_call_search_records(self):
         with mock.patch.object(self.object,
                                'search_records') as fake_search_records:

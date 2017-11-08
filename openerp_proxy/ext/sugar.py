@@ -30,7 +30,16 @@ class ObjectSugar(ObjectRecords):
                 moves = obj[125,126,127]  # returns record list of three move
                                           # records for IDS 125, 126, 127
 
-        2. name_search
+        2. get total number of records in model::
+
+                len(so_obj)  # returns total number of sale order
+
+        3. iterate over all records in model::
+
+                for so in so_obj:
+                    print(so.name)
+
+        4. name_search
 
            Calling object with record name as first argument will execute name
            search on passed name::
@@ -43,7 +52,7 @@ class ObjectSugar(ObjectRecords):
                                        # contain for example sale orders with
                                        # names like 'SO005', 'SO015', etc.
 
-        3. simple search.
+        5. simple search.
 
            If pass domain as first argument when calling object,
            then *search_records* method will be called with all
@@ -80,6 +89,10 @@ class ObjectSugar(ObjectRecords):
     # Overridden to count all records in this object
     def __len__(self):
         return self.search([], count=True)
+
+    # Overrident to add ability to iterate over model
+    def __iter__(self):
+       return iter(self.search_records([]))
 
     # Smart search and name search
     def __call__(self, *args, **kwargs):

@@ -1,6 +1,11 @@
 Last changes
 ============
 
+Release 0.8.0
+-------------
+
+- core logic moved to separate package: odoo-rpc-client
+
 Release 0.7.1
 -------------
 
