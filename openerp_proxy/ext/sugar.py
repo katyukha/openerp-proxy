@@ -92,7 +92,7 @@ class ObjectSugar(ObjectRecords):
 
     # Overrident to add ability to iterate over model
     def __iter__(self):
-       return iter(self.search_records([]))
+        return iter(self.search_records([]))
 
     # Smart search and name search
     def __call__(self, *args, **kwargs):

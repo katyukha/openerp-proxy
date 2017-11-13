@@ -210,13 +210,13 @@ class HField(object):
         """
         try:
             res = obj[name]
-        except:
+        except Exception:
             try:
                 res = obj[int(name)]
-            except:
+            except Exception:
                 try:
                     res = getattr(obj, name)
-                except:
+                except AttributeError:
                     raise FieldNotFoundException(obj, name)
         return res
 
