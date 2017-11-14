@@ -5,9 +5,10 @@ to specific record, or to easily get workflow related to Object.
 Also it provides simple methods to easily send workflow signals
 to records from Object and Record interfaces.
 """
-import numbers
 import six
+import numbers
 
+from pkg_resources import parse_version as V
 
 from ..orm.record import (Record,
                           ObjectRecords)
@@ -31,7 +32,7 @@ class ObjectWorkflow(ObjectRecords):
 
             If there are no workflow for an object then False will be returned
         """
-        if self._workflow is None:
+        if self._workflow is None and self.client.server_version < V('11.0'):
             wkf_obj = self.service.get_obj('workflow')
             # TODO: implement correct behavior for situations with few
             # workflows for same model.
@@ -46,6 +47,8 @@ class ObjectWorkflow(ObjectRecords):
     def workflow_signal(self, obj_id, signal):
         """ Triggers specified signal for object's workflow
         """
+        assert self.client.server_version < V('11.0'), (
+            "Not supported for Odoo 11.0+")
         assert isinstance(obj_id, numbers.Integral), "obj_id must be integer"
         assert isinstance(signal, six.string_types), "signal must be string"
         return self.client.execute_wkf(self.name, signal, obj_id)
@@ -93,6 +96,8 @@ class RecordWorkflow(Record):
     def workflow_signal(self, signal):
         """ trigger's specified signal on record's related workflow
         """
+        assert self.client.server_version < V('11.0'), (
+            "Not supported for Odoo 11.0+")
         return self._object.workflow_signal(self.id, signal)
 
     def refresh(self):
