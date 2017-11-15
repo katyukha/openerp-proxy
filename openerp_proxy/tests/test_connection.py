@@ -97,8 +97,11 @@ class Test_00_Connection(BaseTestCase):
         self.assertEqual(old_uid, cl.uid)
 
     def test_06_get_connector_names(self):
-        self.assertItemsEqual(get_connector_names(),
-                              ['json-rpc', 'json-rpcs', 'xml-rpc', 'xml-rpcs'])
+        names = get_connector_names()
+        self.assertIn('json-rpc', names)
+        self.assertIn('json-rpcs', names)
+        self.assertIn('xml-rpc', names)
+        self.assertIn('xml-rpcs', names)
 
     def test_10_call_unexistint_method(self):
         cl = self.client.login(self.env.dbname,

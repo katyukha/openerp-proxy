@@ -105,7 +105,7 @@ def embed(env, header):
         try:
             from IPython.terminal.ipapp import load_default_config
             ip_config = load_default_config()
-        except:  # TODO: handle correct exception?
+        except ImportError:
             ip_config = None
 
         embed(user_ns=env, header=header, config=ip_config)

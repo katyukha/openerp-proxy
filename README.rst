@@ -43,6 +43,7 @@ Odoo internal code to perform operations on **OpenERP** / **Odoo** objects hidin
 Features
 ~~~~~~~~
 
+-  Use `odoo-rpc-client <https://github.com/katyukha/odoo-rpc-client>`__ under that hood, to get all its power
 -  *Python 3.3+* support
 -  You can call any public method on any OpenERP / Odoo object including:
    *read*, *search*, *write*, *unlink* and others
@@ -103,9 +104,11 @@ Quick example
 Supported Odoo server versions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Tested with Odoo *7.0*, *8.0*, *9.0*, *10.0rc1c*
+Tested with Odoo *10.0*, *11.0*
 
-Also shoud work with Odoo 6.1
+But should support all odoo versions that
+`odoo_rpc_client <https://pypi.python.org/pypi/odoo_rpc_client>`__
+supports
 
 
 Examples
