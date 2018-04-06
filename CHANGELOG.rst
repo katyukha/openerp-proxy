@@ -5,6 +5,7 @@ Release 0.8.0
 -------------
 
 - core logic moved to separate package: `odoo-rpc-client <https://github.com/katyukha/odoo-rpc-client>`__
+- Added new parameter to ``HField`` class: ``highlighters`` that allows to highlight HTMLTable cells
 
 
 Release 0.7.1
