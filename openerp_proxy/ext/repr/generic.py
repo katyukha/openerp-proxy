@@ -514,15 +514,25 @@ class HTMLTable(BaseTable):
                             {% set fhcolor = field.get_field_color(record) %}
                             {% if field._is_header %}
                                 {% if fhcolor %}
-                                    <th title='{{ field }}' style='background: {{ fhcolor }}'>{{ field.get_field(record, mode='html') }}</th>
+                                    <th title='{{ field }}'
+                                        style='background: {{ fhcolor }}'>
+                                    {{ field.get_field(record, mode='html') }}
+                                    </th>
                                 {% else %}
-                                    <th title='{{ field }}'>{{ field.get_field(record, mode='html') }}</th>
+                                    <th title='{{ field }}'>
+                                    {{ field.get_field(record, mode='html') }}
+                                    </th>
                                 {% endif %}
                             {% else %}
                                 {% if fhcolor %}
-                                    <td title='{{ field }}' style='background: {{ fhcolor }}'>{{ field.get_field(record, mode='html') }}</td>
+                                    <td title='{{ field }}'
+                                        style='background: {{ fhcolor }}'>
+                                    {{ field.get_field(record, mode='html') }}
+                                    </td>
                                 {% else %}
-                                    <td title='{{ field }}'>{{ field.get_field(record, mode='html') }}</td>
+                                    <td title='{{ field }}'>
+                                    {{ field.get_field(record, mode='html') }}
+                                    </td>
                                 {% endif %}
                             {% endif %}
                         {% endfor %}

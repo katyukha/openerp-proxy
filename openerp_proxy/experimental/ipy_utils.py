@@ -2,7 +2,8 @@
 """
 
 
-def in_progress(seq, msg="Progress: [%(processed)d / %(total)d]", length=None, close=True):
+def in_progress(seq, msg="Progress: [%(processed)d / %(total)d]",
+                length=None, close=True):
     """ Iterate over sequence, yielding item with progress widget displayed.
         This is useful if you need to precess sequence of items with some
         time consuming operations
@@ -42,18 +43,21 @@ def in_progress(seq, msg="Progress: [%(processed)d / %(total)d]", length=None, c
 
     start_time = time.time()
 
-    progress = IntProgress(value=0, min=0, max=length,
-                           description=msg % {'processed': 0,
-                                              'total': length,
-                                              'time_total': 0.0,
-                                              'time_per_item': 0.0,
-                                              'time_remaining': 0.0,})
+    progress = IntProgress(
+        value=0, min=0, max=length, description=msg % {
+            'processed': 0,
+            'total': length,
+            'time_total': 0.0,
+            'time_per_item': 0.0,
+            'time_remaining': 0.0,
+        }
+    )
     display(progress)
 
     for i, item in enumerate(seq, 1):
         progress.value = i
 
-        i_start_time = time.time()
+        # i_start_time = time.time()
 
         yield item  # Do the job
 
