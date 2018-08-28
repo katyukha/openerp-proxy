@@ -7,6 +7,7 @@ import os.path
 import unittest
 import time
 import six
+import pkg_resources
 
 
 @unittest.skipUnless(os.environ.get('TEST_DB_SERVICE', False),
@@ -48,9 +49,12 @@ class Test_999_DB(BaseTestCase):
             to_dbname(25)
 
     def test_20_dump_drop_restore(self):
+        if self.client.server_version == pkg_resources.parse_version('10.0'):
+            self.skipTest("Dump/Restore is buggy on 10.0")
+
         # dump db
-        dump_data = self.client.services.db.dump_db(self.env.super_password,
-                                                    self.env.dbname)
+        dump_data = self.client.services.db.dump_db(
+            self.env.super_password, self.env.dbname)
         self.assertIsInstance(dump_data, bytes)
 
         # drop it
