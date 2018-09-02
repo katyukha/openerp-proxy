@@ -34,7 +34,7 @@ install:
   - "odoo-install -i $ODOO_INST_PATH --odoo-version ${ODOO_VERSION}"
 
   # Normal install
-  - "pip install --upgrade 'coveralls>=1.1' 'ipython[notebook]>=4' 'setuptools>=18' pip pbr 'anyfield>=0.1.2' 'flake8>=3'"
+  - "pip install --upgrade 'coveralls>=1.1' 'ipython[notebook]>=4' 'setuptools>=18' pbr 'anyfield>=0.1.2' 'flake8>=3'"
   - "python setup.py develop"
 
 before_script:
