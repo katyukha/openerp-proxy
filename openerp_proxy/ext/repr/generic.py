@@ -149,13 +149,19 @@ class HField(object):
                     `AnyField <https://pypi.python.org/pypi/anyfield>`__ lib,
                     but at moment of writing this,
                     it is in experimental stage still
+        :param dict highlighters: Field highlighters. dictionary, where
+                                  key is HTML Color, and value is function
+                                  with signature *f(record, field_value)->bool*
+                                  If function return True, ther highlighter
+                                  is used
 
         :type args: list | tuple
         :param dict kwargs: same as *args* but for keyword arguments
     """
 
     def __init__(self, field, name=None, silent=False, default=None,
-                 is_header=False, parent=None, args=None, kwargs=None):
+                 is_header=False, parent=None, args=None,
+                 highlighters=None, kwargs=None):
         if callable(field):
             field = normalizeSField(field)
 
@@ -166,6 +172,7 @@ class HField(object):
         self._is_header = is_header
         self._parent = parent
         self._args = tuple() if args is None else args
+        self._highlighters = {} if highlighters is None else highlighters
         self._kwargs = dict() if kwargs is None else kwargs
 
     def F(self, field, **kwargs):
@@ -210,28 +217,17 @@ class HField(object):
         """
         try:
             res = obj[name]
-        except:
+        except Exception:
             try:
                 res = obj[int(name)]
-            except:
+            except Exception:
                 try:
                     res = getattr(obj, name)
-                except:
+                except AttributeError:
                     raise FieldNotFoundException(obj, name)
         return res
 
-    def get_field(self, record, mode='text'):
-        """ Returns requested value from specified record (object)
-
-            :param record: Record instance to get field from
-                           (also should work on any other object)
-            :type record: Record
-            :param str mode: (optional) specify field mode.
-                             possible values: ('text', 'html')
-                             default: 'text'
-            :return: requested value
-        """
-        assert mode in ('text', 'html')
+    def _get_value(self, record):
         # process parent field
         if self._parent is not None:
             record = self._parent.get_field(record)
@@ -267,6 +263,22 @@ class HField(object):
                     else:                  # or return default value
                         r = self._default
                         break
+        return r
+
+    def get_field(self, record, mode='text'):
+        """ Returns requested value from specified record (object)
+
+            :param record: Record instance to get field from
+                           (also should work on any other object)
+            :type record: Record
+            :param str mode: (optional) specify field mode.
+                             possible values: ('text', 'html')
+                             default: 'text'
+            :return: requested value
+        """
+        assert mode in ('text', 'html')
+
+        r = self._get_value(record)
 
         if mode == 'html':
             if isinstance(r, HTMLTable):
@@ -278,6 +290,19 @@ class HField(object):
                 r = r._repr_html_()
 
         return r
+
+    def get_field_color(self, record):
+        value = self._get_value(record)
+
+        for color, checker in self._highlighters.items():
+            try:
+                check_res = checker(record, value)
+            except Exception:
+                if not self._silent:
+                    raise
+
+            if check_res:
+                return color
 
     def __call__(self, record):
         """ Get value from specified record
@@ -466,31 +491,55 @@ class HTMLTable(BaseTable):
                     method of this table to export it to CSV format
                 </div>
             {% endif %}
-            <table class='table table-bordered table-condensed table-striped'>
-                <tr style='border: none'>
-                    {% for header in table.fields %}
-                         <th>{{ header }}</th>
-                    {% endfor %}
-                </tr>
-                {% for record in table.data %}
-                    {% set hcolor = table.highlight_record(record) %}
-
-                    {% if hcolor %}
-                         <tr style='border:none;background: {{ hcolor }}'>
-                    {% else %}
-                         <tr style='border:none'>
-                    {% endif %}
-
-                    {% for field in table.fields %}
-                         {% if field._is_header %}
-                            <th>{{ field.get_field(record, mode='html') }}</th>
-                         {% else %}
-                            <td>{{ field.get_field(record, mode='html') }}</td>
-                         {% endif %}
-                    {% endfor %}
-
+            <table class='table table-bordered table-condensed table-striped'
+                   style='table-layout: unset'>
+                <thead>
+                    <tr style='border: none'>
+                        {% for header in table.fields %}
+                            <th>{{ header }}</th>
+                        {% endfor %}
                     </tr>
-                {% endfor %}
+                </thead>
+                <tbody>
+                    {% for record in table.data %}
+                        {% set hcolor = table.highlight_record(record) %}
+
+                        {% if hcolor %}
+                            <tr style='border:none;background: {{ hcolor }}'>
+                        {% else %}
+                            <tr style='border:none'>
+                        {% endif %}
+
+                        {% for field in table.fields %}
+                            {% set fhcolor = field.get_field_color(record) %}
+                            {% if field._is_header %}
+                                {% if fhcolor %}
+                                    <th title='{{ field }}'
+                                        style='background: {{ fhcolor }}'>
+                                    {{ field.get_field(record, mode='html') }}
+                                    </th>
+                                {% else %}
+                                    <th title='{{ field }}'>
+                                    {{ field.get_field(record, mode='html') }}
+                                    </th>
+                                {% endif %}
+                            {% else %}
+                                {% if fhcolor %}
+                                    <td title='{{ field }}'
+                                        style='background: {{ fhcolor }}'>
+                                    {{ field.get_field(record, mode='html') }}
+                                    </td>
+                                {% else %}
+                                    <td title='{{ field }}'>
+                                    {{ field.get_field(record, mode='html') }}
+                                    </td>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+
+                        </tr>
+                    {% endfor %}
+                </tbody>
             </table>
             <div class='panel-footer'>Total lines: {{ table|length }}</div>
         <div>

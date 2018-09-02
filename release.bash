@@ -20,6 +20,7 @@ usage="
         --py2                  - use python 2
         --py3                  - use python 3 (default)
         --reuse-venv           - do not remove virtual environment, and reusse it on next call
+        --no-docs
 
 "
 
@@ -48,6 +49,9 @@ do
         --reuse-venv)
             REUSE_VENV=1;
         ;;
+        --no-docs)
+            NO_DOCS_UPLOAD=1;
+        ;;
         *)
             echo "Unknown option $key";
             exit 1;
@@ -72,16 +76,17 @@ function make_venv {
         virtualenv -p $py_version $dest_dir;
     fi
 
-    $dest_dir/bin/easy_install --upgrade setuptools pip;
+    $dest_dir/bin/easy_install --upgrade setuptools pip twine;
 
     $dest_dir/bin/pip install --upgrade ipython;
 }
 
 function build_docs {
-    pip install --upgrade sphinx[all];
-    (cp -f $SCRIPTPATH/README.rst $SCRIPTPATH/docs/source/intro.rst)
-    python $SCRIPTPATH/setup.py build_sphinx;
-
+    if [ -z "$NO_DOCS_UPLOAD" ]; then
+        pip install --upgrade sphinx[all];
+        (cp -f $SCRIPTPATH/README.rst $SCRIPTPATH/docs/source/intro.rst)
+        python $SCRIPTPATH/setup.py build_sphinx;
+    fi
 }
 
 function release_implementation {
@@ -90,21 +95,21 @@ function release_implementation {
 
     # Build options. if no dry run, then upload to pypi
     local setup_options=" sdist bdist_wheel ";
-    if [ -z $DRY_RUN ]; then
-        setup_options="$setup_options upload";
-    fi
-
-    # If using test index, add it to upload options
-    if [ ! -z $TEST_PYPI_INDEX ]; then
-        setup_options="$setup_options -r https://testpypi.python.org/pypi";
-    fi
 
     # Build [and upload to pypi] project
     python $SCRIPTPATH/setup.py $setup_options;
 
+    if [ -z $DRY_RUN ]; then
+        # If using test index, add it to upload options
+        if [ ! -z $TEST_PYPI_INDEX ]; then
+            twine_options="$setup_options --repository-url https://testpypi.python.org/pypi";
+        fi
+        twine upload $twine_options "$SCRIPTPATH/dist/*"
+    fi
+
     build_docs;
 
-    if [ -z $DRY_RUN ] && [ -z $TEST_PYPI_INDEX ]; then
+    if [ -z $DRY_RUN ] && [ -z $TEST_PYPI_INDEX ] && [ -z $NO_DOCS_UPLOAD ]; then
         python setup.py upload_docs;
     fi
 }

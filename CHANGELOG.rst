@@ -1,6 +1,13 @@
 Last changes
 ============
 
+Release 1.0.0
+-------------
+
+- core logic moved to separate package: `odoo-rpc-client <https://github.com/katyukha/odoo-rpc-client>`__
+- Added new parameter to ``HField`` class: ``highlighters`` that allows to highlight HTMLTable cells
+
+
 Release 0.7.1
 -------------
 
@@ -19,7 +26,7 @@ Release 0.7.0
 - Drop support of OpenERP 6.0
 - ``ext.repr``: Added ability to pass table format to .as_table method
   tablefmt arg must be suitable for tabulate.tabulate method from
-  [Tabulate](https://pypi.python.org/pypi/tabulate) package
+  `Tabulate <https://pypi.python.org/pypi/tabulate>`__ package
 - Added ``openerp_proxy.experimental`` subpackage.
 - Refactored session logic. Logic related to database / client connection
   management moved to separate class ``openerp_proxy.session.ClientManager``
