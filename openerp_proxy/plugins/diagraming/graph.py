@@ -21,15 +21,19 @@ class Model(graphml_yed.NodeBigEntity):
 
     def __init__(self, obj):
         self._object = obj
-        super(
-            Model,
-            self).__init__(
-            self._object.model_name,
-            '\n'.join(
-                self.fields))
+        if obj.model_name != obj.name:
+            node_label = "%s\n(%s)" % (
+                self._object.model_name, self._object.name)
+        else:
+            node_label = self._object.model_name
+        node_attributes = '\n'.join(self.fields)
+        super(Model, self).__init__(node_label, node_attributes)
 
     def __eq__(self, other):
         return self._object == other._object
+
+    def __hash__(self):
+        return hash(self._object.name)
 
     @property
     def name(self):
@@ -114,6 +118,11 @@ class ModelRelation(object):
 
         return False
 
+    def __hash__(self):
+        return hash(
+            "%s-%s-%s-%s" % (self.rel_type, self.field_name,
+                             self.source, self.target))
+
     def to_graphml(self):
         label = self.field_name
         source_arrow = 'none'
@@ -162,6 +171,11 @@ class ModelM2MRelation(ModelRelation):
                     self.m2m_table == other.m2m_table and
                     self.m2m_columns == reversed(other.m2m_columns))
         return False
+
+    def __hash__(self):
+        return hash(
+            "%s-%s-%s-%s" % (self.rel_type, self.field_name,
+                             self.source, self.target))
 
     def to_graphml(self):
         if self.m2m_table:
@@ -217,8 +231,8 @@ class ModelGraph(Extensible):
         """ Clean graph
         """
         self._graph = None
-        self._relations = []
-        self._processed_models = []
+        self._relations = set()
+        self._processed_models = set()
 
     def _get_graph_model(self, name):
         model = self._model_cache.get(name, None)
@@ -234,7 +248,7 @@ class ModelGraph(Extensible):
                 self._find_relations(model)
         else:
             self._processed_models.add(model)
-            for field_name, field in model.fields.iteritems():
+            for field_name, field in model.fields.items():
                 if field['type'] not in ('many2one', 'many2many', 'one2many'):
                     continue
 
