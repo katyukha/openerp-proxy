@@ -46,7 +46,9 @@ TEMPLATE_NODE_BIG_ENTITY = Template("""
     <y:GenericNode configuration="com.yworks.entityRelationship.big_entity">
         <y:Geometry height="{{ node.height }}" width="{{ node.width }}"
                     x="0" y="0"/>
-        <y:Fill color="#E8EEF7" color2="#B7C9E3" transparent="false"/>
+        <y:Fill color="{{ node.color }}"
+                color2="{{ node.color2 }}"
+                transparent="false"/>
         <y:BorderStyle color="#000000" type="line" width="1.0"/>
         <y:NodeLabel alignment="center" autoSizePolicy="content"
                      backgroundColor="#B7C9E3"
@@ -206,7 +208,8 @@ class Node(object):
 
     def to_graphml(self):
         if self._template is None:
-            raise NotImplemented("There is no defined template for this class")
+            raise NotImplementedError(
+                "There is no defined template for this class")
         return self._template.render(node=self)
 
     def __str__(self):
@@ -229,8 +232,13 @@ class NodeBigEntity(Node):
     _template = TEMPLATE_NODE_BIG_ENTITY
     _id_prefix = 'node_entity_big_'
 
-    def __init__(self, label, attributes):
+    _default_fill_color = "#E8EEF7"
+    _default_fill_color2 = "#B7C9E3"
+
+    def __init__(self, label, attributes, color=None, color2=None):
         self.attributes = str(attributes)
+        self.color = self._default_fill_color if color is None else color
+        self.color2 = self._default_fill_color2 if color2 is None else color2
         super(NodeBigEntity, self).__init__(label)
 
     @property

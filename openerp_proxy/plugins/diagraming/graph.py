@@ -7,10 +7,45 @@ from . import graphml_yed
 
 
 SKIP_MODEL_FIELDS = [
+    'id',
     'create_date',
     'create_uid',
     'write_date',
     'write_uid',
+    '__last_update',
+    'display_name',
+
+    'message_is_follower',
+    'message_follower_ids',
+    'message_partner_ids',
+    'message_channel_ids',
+    'message_ids',
+    'message_last_post',
+    'message_unread',
+    'message_unread_counter',
+    'message_needaction',
+    'message_needaction_counter',
+    'website_message_ids',
+
+    'activity_ids',
+    'activity_state',
+    'activity_user_id',
+    'activity_type_id',
+    'activity_date_deadline',
+    'activity_summary',
+
+    'website_meta_title',
+    'website_meta_description',
+    'website_meta_keywords',
+    'website_published',
+    'website_url',
+    'website_description',
+
+    'rating_ids',
+    'rating_last_value',
+    'rating_last_feedback',
+    'rating_last_image',
+    'rating_count',
 ]
 
 
@@ -19,15 +54,17 @@ class Model(graphml_yed.NodeBigEntity):
     """ Odoo model abstraction layer
     """
 
-    def __init__(self, obj):
+    def __init__(self, obj, *args, **kwargs):
         self._object = obj
         if obj.model_name != obj.name:
             node_label = "%s\n(%s)" % (
                 self._object.model_name, self._object.name)
         else:
             node_label = self._object.model_name
-        node_attributes = '\n'.join(self.fields)
-        super(Model, self).__init__(node_label, node_attributes)
+        node_attributes = '\n'.join((
+            f for f in self.fields if f not in SKIP_MODEL_FIELDS))
+        super(Model, self).__init__(
+            node_label, node_attributes, *args, **kwargs)
 
     def __eq__(self, other):
         return self._object == other._object
@@ -165,7 +202,7 @@ class ModelM2MRelation(ModelRelation):
 
     def __eq__(self, other):
         if (isinstance(other, ModelM2MRelation) and
-                super(ModelM2MRelation, self).__eq__(self, other)):
+                super(ModelM2MRelation, self).__eq__(other)):
             return (self.m2m_table and other.m2m_table and
                     self.m2m_columns and other.m2m_columns and
                     self.m2m_table == other.m2m_table and
@@ -180,14 +217,20 @@ class ModelM2MRelation(ModelRelation):
     def to_graphml(self):
         if self.m2m_table:
             m2m_rel_node = graphml_yed.NodeRelationship(self.m2m_table)
-            m2m_rel_edge_1 = graphml_yed.Edge(self.source, m2m_rel_node,
-                                              label=self.m2m_columns[0] + '*',
-                                              source_arrow='crows_foot_one',
-                                              target_arrow='crows_foot_many')
-            m2m_rel_edge_2 = graphml_yed.Edge(self.target, m2m_rel_node,
-                                              label=self.m2m_columns[1] + '*',
-                                              source_arrow='crows_foot_one',
-                                              target_arrow='crows_foot_many')
+            m2m_rel_edge_1 = graphml_yed.Edge(
+                self.source, m2m_rel_node,
+                label=(
+                    (self.m2m_columns[0] + '*')
+                    if self.m2m_columns[0] else '?'),
+                source_arrow='crows_foot_one',
+                target_arrow='crows_foot_many')
+            m2m_rel_edge_2 = graphml_yed.Edge(
+                self.target, m2m_rel_node,
+                label=(
+                    (self.m2m_columns[1] + '*')
+                    if self.m2m_columns[1] else '?'),
+                source_arrow='crows_foot_one',
+                target_arrow='crows_foot_many')
 
             return [m2m_rel_node, m2m_rel_edge_1, m2m_rel_edge_2]
         return super(ModelM2MRelation, self).to_graphml()
@@ -198,15 +241,20 @@ class ModelGraph(Extensible):
     """ Contains single model graph
     """
 
-    def __init__(self, client, models, depth=1):
+    def __init__(self, client, models, depth=1,
+                 ignore_models=None, ignore_fields=None):
         """
-            :param models: list of strings with names of Objects
-                           to build graph for
+            :param list(str) models: list of strings with names of Objects
+                                     to build graph for
+            :param int depth: Recursion depth for model search
         """
         self._client = client
         self._depth = depth
         self._model_cache = {}
-        self._models = [self._get_graph_model(m) for m in models]
+        self._models = [
+            self._get_graph_model(m, main=True) for m in models]
+        self._ignore_models = [] if ignore_models is None else ignore_models
+        self._ignore_fields = [] if ignore_fields is None else ignore_fields
 
         self._relations = set()
         self._processed_models = set()
@@ -234,10 +282,14 @@ class ModelGraph(Extensible):
         self._relations = set()
         self._processed_models = set()
 
-    def _get_graph_model(self, name):
+    def _get_graph_model(self, name, main=False):
         model = self._model_cache.get(name, None)
         if model is None:
-            self._model_cache[name] = model = Model(self._client.get_obj(name))
+            if main:
+                model = Model(self._client.get_obj(name), color="#FFFF99")
+            else:
+                model = Model(self._client.get_obj(name))
+            self._model_cache[name] = model
         return model
 
     def _find_relations(self, model=None, level=0):
@@ -255,8 +307,14 @@ class ModelGraph(Extensible):
                 if field_name in SKIP_MODEL_FIELDS:
                     continue
 
+                if field_name in self._ignore_fields:
+                    continue
+
                 source = model
                 target = self._get_graph_model(field['relation'])
+
+                if target in self._ignore_models:
+                    continue
 
                 if field['type'] == 'many2many':
                     relation = ModelM2MRelation(source, target, field_name)
